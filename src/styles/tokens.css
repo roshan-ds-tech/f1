@@ -14,7 +14,7 @@
 --stage:radial-gradient(ellipse 42% 16% at 50% 80%,rgba(255,59,48,.14) 0%,rgba(255,59,48,0) 100%),
         radial-gradient(ellipse 80% 65% at 50% 62%,#171B22 0%,#0D1015 62%,#090B0E 100%);--tile:#E4E6E9}
 
-html,body{margin:0;background:var(--bg);overflow-x:hidden}
+html,body{margin:0;background:var(--bg);overflow-x:clip}
 *{box-sizing:border-box}
 @keyframes pw-spin{to{transform:rotate(360deg)}}
 @keyframes pw-pulse{0%,100%{opacity:1}50%{opacity:.35}}

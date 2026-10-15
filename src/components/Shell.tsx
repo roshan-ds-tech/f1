@@ -31,8 +31,8 @@ export function Shell() {
   const logo = collapsed ? (dark ? '/brand/mark-dark.png' : '/brand/mark-light.png') : (dark ? '/brand/lockup-dark.png' : '/brand/lockup-light.png');
 
   return (
-    <div className="shell">
-      <aside className="side" style={{ width: collapsed ? 64 : 224 }}>
+    <div className="shell" style={{ ['--side-w' as string]: `${collapsed ? 64 : 224}px` }}>
+      <aside className="side">
         <div className="brand" style={{ height: collapsed ? 56 : 104, padding: collapsed ? '0 10px' : '0 18px' }}>
           <img src={logo} alt="PITWISE Race Strategy Intelligence" style={{ mixBlendMode: dark ? 'lighten' : 'multiply', width: '100%' }} />
         </div>
