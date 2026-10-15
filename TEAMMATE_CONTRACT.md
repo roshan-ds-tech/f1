@@ -1,0 +1,75 @@
+# PITWISE — Teammate Contract
+
+You own **one** page file plus `src/components/<yourpage>/`. Shared files are owned by the lead — do not edit them.
+
+| Page | File | Your components folder |
+|---|---|---|
+| Telemetry | `src/pages/Telemetry.tsx` | `src/components/telemetry/` |
+| Tyre Analysis | `src/pages/TyreAnalysis.tsx` | `src/components/tyreanalysis/` |
+| Weather & Track | `src/pages/WeatherTrack.tsx` | `src/components/weathertrack/` |
+
+## 1. App context
+```ts
+import { useApp } from '../state/AppContext';
+const { raceState, results, fixture, lap, mode, circuit, provenance } = useApp();
+```
+```ts
+interface AppContextValue {
+  mode:'replay'|'live'|'scenario';  setMode(m):void;
+  circuit:CircuitId;                setCircuit(c):void;
+  driverCode:string;                setDriver(d):void;
+  lap:number;                       setLap(l):void;
+  scenario:ScenarioInputs;          setScenario(s:Partial<ScenarioInputs>):void;
+  raceState:RaceState;              // derived, read-only (replay: only laps <= lap are visible)
+  results:StrategyResult[];         // derived, read-only, sorted best first
+  loading:boolean;
+  fixture:RaceFixture|null;         // full prepared race for the circuit (meta, drivers, timeline, weather)
+  provenance:Provenance;
+  // read-only extras
+  k:Constants; elapsedMs:number; selectedId:string|null;
+}
+```
+Types: `src/engine/types.ts`, fixture types: `src/data/types.ts`. **In replay mode never read `fixture.timeline` entries with `lap > lap`** — filter first.
+
+## 2. CSS tokens
+Colours come from CSS variables, never hex literals:
+`--bg --surface --surface2 --card --line --grid --text --text2 --red --med --hard --inter --blue --amber --green --stage`.
+Classes: `.card` (surface panel), `.label` (10px caps caption), `.mono` (tabular numbers), plus `.pad .row .grid .g2 .g3 .sub .btn .seg .warn`.
+
+## 3. Compound colours
+```ts
+import { COMPOUND_COLOR, COMPOUND_LETTER } from '../styles/compounds';
+COMPOUND_COLOR.SOFT // 'var(--red)'
+```
+Never hardcode compound colours elsewhere.
+
+## 4. Provenance (mandatory)
+Every displayed value carries one: `HISTORICAL` (REAL HISTORICAL DATA), `LIVE` (LIVE DATA), `SIMULATED` (SIMULATED INPUT), `ESTIMATE` (MODEL ESTIMATE).
+`<ProvenanceBadge tag="ESTIMATE" />`. Never present generated values as recorded. No `Math.random()` anywhere in `src/engine/`.
+
+## 5. Shared components — `src/components/ui`
+`ProvenanceBadge`, `StatTile({label,value,sub?,prov?})`, `SegmentedControl({options,value,onChange})`, `Card({title?,right?,children})`, `EmptyState({title,children?,action?})`, `CircuitSelect({value,onChange})`.
+
+## 6. API (`/api/*`, all responses `{ data, provenance, generatedAt, source }`)
+- `GET /api/health` → `{"data":{"status":"ok"},"provenance":"NONE",...}`
+- `GET /api/circuits` → circuit assumptions array (`provenance:"ESTIMATE"`)
+- `GET /api/race/:circuit` → full fixture (`provenance` HISTORICAL or SIMULATED)
+- `GET /api/weather/:circuit` → `{meta, weather:[{lap,airTempC,trackTempC,rainfall}]}`
+- `GET /api/telemetry/:circuit?lap=31&driver=VER` → lap rows up to `lap` for the driver (lap-level only)
+- `POST /api/strategy` body `{state:RaceState,k?,seed?}` → `{results,elapsedMs}`
+Circuits: `baku | madrid | monaco | singapore`. Unknown circuit → 400, unknown route → 404.
+
+## 7. Worked example — one tyre card
+```tsx
+import { useApp } from '../state/AppContext';
+import { Card, ProvenanceBadge } from '../components/ui';
+import { COMPOUND_COLOR } from '../styles/compounds';
+export function Example() {
+  const { raceState } = useApp();
+  const c = raceState.corners[0];
+  return <Card title={c.corner} right={<ProvenanceBadge tag="ESTIMATE" />}>
+    <b style={{ color: COMPOUND_COLOR[c.compound] }}>{c.compound}</b>
+    <div className="mono">{c.paceLossSec.toFixed(2)} s/lap · {c.lapsToDropOff} laps to drop-off</div>
+  </Card>;
+}
+```
