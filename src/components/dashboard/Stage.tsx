@@ -40,7 +40,8 @@ export function Stage() {
   const [rotate, setRotate] = useState(false);
   const [sel, setSel] = useState<Corner | null>(null);
   const [map, setMap] = useState<Record<Slot, Corner>>(DEFAULT_MAP);
-  const tick = useRef(0);
+  const bound = useRef(false);
+  const smooth = useRef<Partial<Record<Slot, { x: number; y: number }>>>({});
   const api = useRef<ViewerApi | null>(null);
   const cards = useRef<Partial<Record<Slot, HTMLDivElement | null>>>({});
   const lines = useRef<Partial<Record<Slot, SVGPathElement | null>>>({});
@@ -49,23 +50,28 @@ export function Stage() {
   const selRef = useRef(sel); selRef.current = sel;
 
   const onFrame = useCallback((pos: Partial<Record<Corner, { x: number; y: number }>>) => {
-    // Same rule as the design: the two higher wheels take the top cards, ordered left to right.
-    // Re-checked every ~20 frames so cards follow the car while orbiting and lines never cross.
-    if (++tick.current % 20 === 1) {
+    // Bind cards to wheels once (after the model loads, and again on Reset view): the two higher
+    // wheels take the top cards, left to right. Never re-bind while orbiting, so a card always
+    // stays with the same tyre and its line simply follows that wheel round.
+    if (!bound.current) {
       const pr = (Object.keys(pos) as Corner[]).map(c => ({ c, ...pos[c]! })).sort((a, b) => a.y - b.y);
       if (pr.length === 4) {
         const top = pr.slice(0, 2).sort((a, b) => a.x - b.x), bot = pr.slice(2).sort((a, b) => a.x - b.x);
         const next = { tl: top[0].c, tr: top[1].c, bl: bot[0].c, br: bot[1].c };
-        const cur = mapRef.current;
-        if (SLOTS.some(sl => cur[sl] !== next[sl])) { mapRef.current = next; setMap(next); }
+        bound.current = true; smooth.current = {};
+        if (SLOTS.some(sl => mapRef.current[sl] !== next[sl])) { mapRef.current = next; setMap(next); }
       }
     }
     SLOTS.forEach(slot => {
-      const card = cards.current[slot], ln = lines.current[slot], mk = marks.current[slot], p = pos[mapRef.current[slot]];
-      if (!card || !ln || !mk || !p) return;
+      const card = cards.current[slot], ln = lines.current[slot], mk = marks.current[slot], target = pos[mapRef.current[slot]];
+      if (!card || !ln || !mk || !target) return;
+      // Ease the endpoint toward the projected wheel so the line glides instead of jittering.
+      const p = smooth.current[slot] ?? (smooth.current[slot] = { ...target });
+      p.x += (target.x - p.x) * 0.35; p.y += (target.y - p.y) * 0.35;
       const left = slot[1] === 'l';
       const ax = left ? card.offsetLeft + card.offsetWidth : card.offsetLeft, ay = card.offsetTop + 28, mx = ax + (left ? 14 : -14);
       const on = selRef.current === mapRef.current[slot];
+      ln.style.transition = 'stroke .2s, opacity .2s';
       ln.setAttribute('d', `M${ax.toFixed(1)} ${ay.toFixed(1)} L${mx.toFixed(1)} ${ay.toFixed(1)} L${p.x.toFixed(1)} ${p.y.toFixed(1)}`);
       ln.style.opacity = on ? '1' : '.7'; ln.style.stroke = on ? 'var(--red)' : 'var(--text2)'; ln.style.strokeWidth = on ? '1.75' : '1.25';
       mk.style.transform = `translate(${p.x.toFixed(1)}px,${p.y.toFixed(1)}px)`; mk.style.opacity = '1';
@@ -73,7 +79,7 @@ export function Stage() {
   }, []);
 
   const ready = status.state === 'ready';
-  const retry = () => { tick.current = 0; setMap(DEFAULT_MAP); setAttempt(a => a + 1); };
+  const retry = () => { bound.current = false; setMap(DEFAULT_MAP); setAttempt(a => a + 1); };
   const errorCard = (msg: string) => (
     <div style={{ position: 'absolute', left: '50%', top: '56%', transform: 'translate(-50%,-50%)', width: 290, padding: 18, borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 8, textAlign: 'center', alignItems: 'center', zIndex: 4 }}>
       <div style={{ fontWeight: 700 }}>3D vehicle unavailable</div>
@@ -137,7 +143,7 @@ export function Stage() {
         <button className={rotate ? 'on' : ''} aria-pressed={rotate} title="Auto-rotate" aria-label="Auto-rotate" onClick={() => setRotate(r => !r)}><Rotate3d size={16} /></button>
         <button title="Zoom out" aria-label="Zoom out" onClick={() => api.current?.zoom(1.15)}><Minus size={16} /></button>
         <button title="Zoom in" aria-label="Zoom in" onClick={() => api.current?.zoom(1 / 1.15)}><Plus size={16} /></button>
-        <button title="Reset view" aria-label="Reset view" onClick={() => api.current?.reset()}><RotateCcw size={15} /></button>
+        <button title="Reset view" aria-label="Reset view" onClick={() => { api.current?.reset(); bound.current = false; }}><RotateCcw size={15} /></button>
       </div>
       <div className="attr"><a href="https://sketchfab.com/3d-models/2026-redbull-rb22-0a3d24a58e0549d591a5a48c22eec383" target="_blank" rel="noreferrer">RB22 model</a> by Dave Love · <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a></div>
     </section>
