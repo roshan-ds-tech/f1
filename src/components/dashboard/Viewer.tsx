@@ -6,7 +6,11 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import type { CornerState } from '../../engine/types';
 import type { Theme } from '../../state/theme';
 
-export const MODEL_URL = 'https://raw.githubusercontent.com/roshan-ds-tech/f1/main/2026_redbull_rb22.glb';
+/** Same-origin copy first; GitHub raw (pinned to the commit that added it, so it never moves) as fallback. */
+export const MODEL_URLS = [
+  '/models/rb22.glb',
+  'https://raw.githubusercontent.com/roshan-ds-tech/f1/bbc28fcfe1fbb1c5c2da524c8b84ffb1f07cd4b1/2026_redbull_rb22.glb',
+];
 export type Corner = CornerState['corner'];
 export type Slot = 'tl' | 'tr' | 'bl' | 'br';
 export type ViewerStatus = { state: 'loading' | 'ready' | 'error'; progress: number; loaded: number; error: string };
@@ -130,7 +134,7 @@ export function Viewer({ theme, autoRotate, selected, apiRef, onStatus, onFrame 
     };
     loop();
 
-    new GLTFLoader().load(MODEL_URL, g => {
+    const onModel = (g: { scene: THREE.Group }) => {
       if (dead) return;
       const model = g.scene;
       model.traverse(o => { const m = o as THREE.Mesh; if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
@@ -173,11 +177,18 @@ export function Viewer({ theme, autoRotate, selected, apiRef, onStatus, onFrame 
         scene.add(ring); c.rings[k] = ring;
       });
       statusCb.current({ state: 'ready', progress: 1, loaded: 0, error: '' });
-    }, x => {
-      if (!dead) statusCb.current({ state: 'loading', progress: x.total ? x.loaded / x.total : 0, loaded: x.loaded, error: '' });
-    }, () => {
-      if (!dead) statusCb.current({ state: 'error', progress: 0, loaded: 0, error: 'The model file could not be downloaded.' });
-    });
+    };
+    const tryLoad = (i: number) => {
+      new GLTFLoader().load(MODEL_URLS[i], onModel, x => {
+        if (!dead) statusCb.current({ state: 'loading', progress: x.total ? x.loaded / x.total : 0, loaded: x.loaded, error: '' });
+      }, err => {
+        if (dead) return;
+        console.warn(`[PITWISE] 3D model failed from ${MODEL_URLS[i]}`, err);
+        if (i + 1 < MODEL_URLS.length) { statusCb.current({ state: 'loading', progress: 0, loaded: 0, error: '' }); tryLoad(i + 1); }
+        else statusCb.current({ state: 'error', progress: 0, loaded: 0, error: 'The model file could not be downloaded.' });
+      });
+    };
+    tryLoad(0);
 
     return () => {
       dead = true; cancelAnimationFrame(raf); ro.disconnect(); window.removeEventListener('pointerup', up);
