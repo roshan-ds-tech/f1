@@ -31,10 +31,13 @@ interface AppContextValue {
 ```
 Types: `src/engine/types.ts`, fixture types: `src/data/types.ts`. **In replay mode never read `fixture.timeline` entries with `lap > lap`** — filter first.
 
+## 1b. Design source
+`design-reference.html` (repo root) is the readable markup of the approved design, with exact inline styles. Port your page from it, not from screenshots. Fonts: **Sora** for display numerals/headings (`className="sora"`), **Manrope** for everything else (already on `body`). Tyre photos: `/tyres/soft.png`, `/tyres/medium.png`, `/tyres/inter.png` only. Use `<TyreThumb c={compound}/>` from `src/components/TyreThumb.tsx`, which already does the ring fallback for Hard and Wet.
+
 ## 2. CSS tokens
 Colours come from CSS variables, never hex literals:
-`--bg --surface --surface2 --card --line --grid --text --text2 --red --med --hard --inter --blue --amber --green --stage`.
-Classes: `.card` (surface panel), `.label` (10px caps caption), `.mono` (tabular numbers), plus `.pad .row .grid .g2 .g3 .sub .btn .seg .warn`.
+`--bg --surface --surface2 --card --line --grid --text --text2 --red --redTint --green --greenTint --amber --amberFill --amberTint --blue --blueTint --hard --med --inter --tile --stage`. Both `data-theme="dark"` (default) and `"light"` must work.
+Classes: `.card` (14px-radius panel), `.label` (10.5px/600, 1.4px tracking, the only caption style), `.sora`, `.mono`, `.strip` + `.cell` (hairline stat strip), `.chart-grid` + `.chart`, `.pill`, `.btn`, `.seg`, `.empty`, `.warn`. Radii: 14px panels, 10px tiles, 999px pills. Panel padding `26px 28px 24px`, block gap 16px.
 
 ## 3. Compound colours
 ```ts
@@ -48,7 +51,7 @@ Every displayed value carries one: `HISTORICAL` (REAL HISTORICAL DATA), `LIVE` (
 `<ProvenanceBadge tag="ESTIMATE" />`. Never present generated values as recorded. No `Math.random()` anywhere in `src/engine/`.
 
 ## 5. Shared components — `src/components/ui`
-`ProvenanceBadge`, `StatTile({label,value,sub?,prov?})`, `SegmentedControl({options,value,onChange})`, `Card({title?,right?,children})`, `EmptyState({title,children?,action?})`, `CircuitSelect({value,onChange})`.
+`ProvenanceBadge({tag, short?})`, `StatStrip` wrapping `StatTile({label,value,sub?,prov?})` cells, `SegmentedControl({options,value,onChange})`, `Card({title?,right?,children})`, `EmptyState({title,children?,action?})`, `CircuitSelect({value,onChange})`.
 
 ## 6. API (`/api/*`, all responses `{ data, provenance, generatedAt, source }`)
 - `GET /api/health` → `{"data":{"status":"ok"},"provenance":"NONE",...}`

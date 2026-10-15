@@ -35,9 +35,9 @@ export function Shell() {
 
   return (
     <div className="shell">
-      <aside className="side" style={{ width: collapsed ? 72 : 248 }}>
-        <div className="brand" style={{ height: collapsed ? 72 : 150, padding: collapsed ? '0 12px' : '0 24px' }}>
-          <img src={logo} alt="PITWISE Race Strategy Intelligence" style={{ mixBlendMode: dark ? 'lighten' : 'multiply', width: collapsed ? '100%' : 200 }} />
+      <aside className="side" style={{ width: collapsed ? 64 : 224 }}>
+        <div className="brand" style={{ height: collapsed ? 56 : 104, padding: collapsed ? '0 10px' : '0 18px' }}>
+          <img src={logo} alt="PITWISE Race Strategy Intelligence" style={{ mixBlendMode: dark ? 'lighten' : 'multiply', width: '100%' }} />
         </div>
         <nav aria-label="Main" className="navlist">
           {ITEMS.map(({ to, label, Icon }) => (

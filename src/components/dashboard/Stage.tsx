@@ -1,4 +1,4 @@
-import { Component, useCallback, useRef, useState, type ReactNode } from 'react';
+import { Component, Suspense, lazy, useCallback, useRef, useState, type ReactNode } from 'react';
 import { Rotate3d, Minus, Plus, RotateCcw } from 'lucide-react';
 import { useApp } from '../../state/AppContext';
 import { useThemeValue } from '../../state/theme';
@@ -7,7 +7,10 @@ import { degradation } from '../../engine/lapTime';
 import type { CornerState } from '../../engine/types';
 import { ProvenanceBadge } from '../ui';
 import { TyreThumb, COMPOUND_NAME } from '../TyreThumb';
-import { Viewer, type Corner, type Slot, type ViewerApi, type ViewerStatus } from './Viewer';
+import type { Corner, Slot, ViewerApi, ViewerStatus } from './Viewer';
+
+// three.js is ~600 KB; load it in its own chunk after the dashboard paints.
+const Viewer = lazy(() => import('./Viewer').then(m => ({ default: m.Viewer })));
 
 const NAME: Record<Corner, string> = { FL: 'Front left', FR: 'Front right', RL: 'Rear left', RR: 'Rear right' };
 const SLOTS: Slot[] = ['tl', 'tr', 'bl', 'br'];
@@ -37,7 +40,7 @@ export function Stage() {
   const [rotate, setRotate] = useState(false);
   const [sel, setSel] = useState<Corner | null>(null);
   const [map, setMap] = useState<Record<Slot, Corner>>(DEFAULT_MAP);
-  const assigned = useRef(false);
+  const tick = useRef(0);
   const api = useRef<ViewerApi | null>(null);
   const cards = useRef<Partial<Record<Slot, HTMLDivElement | null>>>({});
   const lines = useRef<Partial<Record<Slot, SVGPathElement | null>>>({});
@@ -46,13 +49,15 @@ export function Stage() {
   const selRef = useRef(sel); selRef.current = sel;
 
   const onFrame = useCallback((pos: Partial<Record<Corner, { x: number; y: number }>>) => {
-    if (!assigned.current) {
-      // Same rule as the design: the two higher wheels take the top cards, ordered left to right.
+    // Same rule as the design: the two higher wheels take the top cards, ordered left to right.
+    // Re-checked every ~20 frames so cards follow the car while orbiting and lines never cross.
+    if (++tick.current % 20 === 1) {
       const pr = (Object.keys(pos) as Corner[]).map(c => ({ c, ...pos[c]! })).sort((a, b) => a.y - b.y);
       if (pr.length === 4) {
         const top = pr.slice(0, 2).sort((a, b) => a.x - b.x), bot = pr.slice(2).sort((a, b) => a.x - b.x);
-        assigned.current = true;
-        setMap({ tl: top[0].c, tr: top[1].c, bl: bot[0].c, br: bot[1].c });
+        const next = { tl: top[0].c, tr: top[1].c, bl: bot[0].c, br: bot[1].c };
+        const cur = mapRef.current;
+        if (SLOTS.some(sl => cur[sl] !== next[sl])) { mapRef.current = next; setMap(next); }
       }
     }
     SLOTS.forEach(slot => {
@@ -68,7 +73,7 @@ export function Stage() {
   }, []);
 
   const ready = status.state === 'ready';
-  const retry = () => { assigned.current = false; setMap(DEFAULT_MAP); setAttempt(a => a + 1); };
+  const retry = () => { tick.current = 0; setMap(DEFAULT_MAP); setAttempt(a => a + 1); };
   const errorCard = (msg: string) => (
     <div style={{ position: 'absolute', left: '50%', top: '56%', transform: 'translate(-50%,-50%)', width: 290, padding: 18, borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 8, textAlign: 'center', alignItems: 'center', zIndex: 4 }}>
       <div style={{ fontWeight: 700 }}>3D vehicle unavailable</div>
@@ -81,7 +86,9 @@ export function Stage() {
   return (
     <section className="stage" data-screen-label="Vehicle overview">
       <Boundary key={attempt} fallback={errorCard('The 3D viewer crashed.')}>
-        <Viewer key={attempt} attempt={attempt} theme={theme} autoRotate={rotate} selected={sel} apiRef={api} onStatus={setStatus} onFrame={onFrame} />
+        <Suspense fallback={null}>
+          <Viewer key={attempt} attempt={attempt} theme={theme} autoRotate={rotate} selected={sel} apiRef={api} onStatus={setStatus} onFrame={onFrame} />
+        </Suspense>
       </Boundary>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible', zIndex: 1, display: ready ? 'block' : 'none' }}>
         {SLOTS.map(s => <path key={s} ref={el => { lines.current[s] = el; }} d="M0 0" style={{ fill: 'none', stroke: 'var(--text2)', strokeWidth: 1.25, opacity: 0 }} />)}
