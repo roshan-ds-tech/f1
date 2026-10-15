@@ -5,7 +5,6 @@ import type { RaceFixture } from '../data/types';
 import { ZERO_HOUR } from './zeroHour';
 import { CALIBRATION } from '../data/calibration';
 
-/** Base pace for a circuit: fitted from a recorded race when available, else the explicit assumption. */
 export const circuitBasePace = (c:CircuitId) => CALIBRATION[c]?.basePaceSec ?? CIRCUITS[c].basePace;
 
 export type Mode = 'replay' | 'live' | 'scenario';
@@ -31,10 +30,7 @@ export function cornersFor(compound:Compound, age:number, stint:number):CornerSt
 
 function scenarioState(circuit:CircuitId, lap:number, sc:ScenarioInputs):RaceState {
   const z = ZERO_HOUR, c = CIRCUITS[circuit];
-  // ZERO_HOUR paces are written relative to a 92.0 s reference lap; re-base them onto this circuit.
   const shift = circuitBasePace(circuit) - CIRCUITS.madrid.basePace;
-  // The challenge fixes lap 31 of 53. We keep that hypothetical distance (labelled SIMULATED)
-  // rather than presenting it as the circuit's real race length.
   const total = z.totalLaps;
   const cur = Math.min(lap, total - 2);
   const wet = WX[sc.wx];
@@ -53,7 +49,6 @@ function scenarioState(circuit:CircuitId, lap:number, sc:ScenarioInputs):RaceSta
 }
 
 function replayState(fx:RaceFixture, lap:number, driverCode:string, circuit:CircuitId):RaceState {
-  // Future laps are made inaccessible: everything below reads only `past`.
   const past = fx.timeline.filter(e => e.lap <= lap);
   const c = CIRCUITS[circuit];
   const driver = fx.drivers.find(d => d.code === driverCode) ?? fx.drivers[0];

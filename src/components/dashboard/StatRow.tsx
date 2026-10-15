@@ -3,7 +3,6 @@ import { useApp } from '../../state/AppContext';
 import { CircuitMap } from './CircuitMap';
 import type { RaceFixture } from '../../data/types';
 
-/** Sector deltas vs the car leading on the same lap. Only real recorded timing; never invented. */
 export function sectorDeltas(fixture: RaceFixture | null, lap: number, driverCode: string, enabled: boolean): [number, number, number] | null {
   if (!enabled || !fixture) return null;
   const d = fixture.drivers.find(x => x.code === driverCode) ?? fixture.drivers[0];
@@ -15,7 +14,6 @@ export function sectorDeltas(fixture: RaceFixture | null, lap: number, driverCod
   return [row.s1! - lead.s1!, row.s2! - lead.s2!, row.s3! - lead.s3!];
 }
 
-/** Sector identity colours (same as the circuit profile); performance colours are used only with real timing. */
 const SECTOR_COLORS: [string, string, string] = ['var(--red)', 'var(--amberFill)', 'var(--blue)'];
 
 const fmtD = (v: number) => `${v < 0 ? '−' : '+'}${Math.abs(v).toFixed(3)} s`;
@@ -23,7 +21,6 @@ const fmtD = (v: number) => `${v < 0 ? '−' : '+'}${Math.abs(v).toFixed(3)} s`;
 export function StatRow() {
   const { raceState: s, mode, fixture, lap, driverCode, circuit } = useApp();
   const pct = (s.currentLap / s.totalLaps) * 100;
-  // Leader gap only when every car ahead of us is in the modelled field.
   const ahead = s.rivals.filter(r => r.startOffsetSec < 0);
   let gapText = '—', gapColor = 'var(--text2)';
   if (s.position === 1) { gapText = 'Leader'; gapColor = 'var(--green)'; }

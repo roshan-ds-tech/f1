@@ -16,7 +16,6 @@ export const DEFAULTS = {
 };
 export type Constants = typeof DEFAULTS & { TYRES?:Record<Compound,TyreModel> };
 
-/** Per-circuit overrides. Values are explicit assumptions, not measurements. */
 export const CIRCUITS:Record<CircuitId,{
   name:string; totalLaps:number; pitLossBase:number; basePace:number; scProbPerLap:number;
 }> = {

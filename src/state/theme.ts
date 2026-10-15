@@ -11,13 +11,12 @@ export function useTheme(): [Theme, (t: Theme) => void] {
   const [theme, setTheme] = useState<Theme>(readTheme);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    try { localStorage.setItem(KEY, theme); } catch { /* storage unavailable */ }
+    try { localStorage.setItem(KEY, theme); } catch { }
     window.dispatchEvent(new CustomEvent('pw-theme', { detail: theme }));
   }, [theme]);
   return [theme, setTheme];
 }
 
-/** Subscribe to theme changes made elsewhere (e.g. the 3D viewer's lighting). */
 export function useThemeValue(): Theme {
   const [t, setT] = useState<Theme>(readTheme);
   useEffect(() => {

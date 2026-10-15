@@ -1,7 +1,6 @@
 import type { Compound } from '../engine/types';
 import { COMPOUND_COLOR, COMPOUND_LETTER } from '../styles/compounds';
 
-/** Photos for all five compounds (from the Tyre Analysis design). The ring fallback stays for safety. */
 export const TYRE_IMG: Partial<Record<Compound, string>> = { SOFT: '/tyres/soft.webp', MEDIUM: '/tyres/medium.webp', HARD: '/tyres/hard.webp', INTER: '/tyres/inter.webp', WET: '/tyres/wet.webp' };
 const IMG = TYRE_IMG;
 export const COMPOUND_NAME: Record<Compound, string> = { SOFT: 'Soft', MEDIUM: 'Medium', HARD: 'Hard', INTER: 'Intermediate', WET: 'Wet' };

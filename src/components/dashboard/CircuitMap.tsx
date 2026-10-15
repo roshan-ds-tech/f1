@@ -1,7 +1,6 @@
 import type { CircuitId } from '../../engine/types';
 import { OUTLINES } from '../../data/calibration';
 
-/** Fallback schematic outlines (not to scale), used only where no real outline was captured. */
 const SCHEMATIC: Record<CircuitId, { s: [string, string, string]; start: [number, number] }> = {
   madrid: {
     s: ['M40 104 C 40 58, 70 30, 120 34 L 190 40 C 220 42, 230 20, 255 28',

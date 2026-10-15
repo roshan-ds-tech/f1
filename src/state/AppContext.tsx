@@ -16,12 +16,11 @@ export interface AppContextValue {
   driverCode: string; setDriver(d: string): void;
   lap: number; setLap(l: number): void;
   scenario: ScenarioInputs; setScenario(s: Partial<ScenarioInputs>): void;
-  raceState: RaceState;             // derived, read-only
-  results: StrategyResult[];        // derived, read-only
+  raceState: RaceState;
+  results: StrategyResult[];
   loading: boolean;
   fixture: RaceFixture | null;
   provenance: Provenance;
-  // extras (read-only for teammates)
   k: Constants; elapsedMs: number;
   kOverrides: Partial<Record<string, number>>; setK(key: string, v: number): void; clearK(key: string): void;
   tyreOverrides: Partial<Record<Compound, Partial<TyreModel>>>; setTyre(c: Compound, f: keyof TyreModel, v: number): void;

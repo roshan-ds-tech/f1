@@ -9,7 +9,6 @@ import { ProvenanceBadge } from '../ui';
 import { TyreThumb, COMPOUND_NAME } from '../TyreThumb';
 import type { Corner, Slot, ViewerApi, ViewerStatus } from './Viewer';
 
-// three.js is ~600 KB; load it in its own chunk after the dashboard paints.
 const Viewer = lazy(() => import('./Viewer').then(m => ({ default: m.Viewer })));
 
 const NAME: Record<Corner, string> = { FL: 'Front left', FR: 'Front right', RL: 'Rear left', RR: 'Rear right' };
@@ -18,7 +17,6 @@ const DEFAULT_MAP: Record<Slot, Corner> = { tl: 'FL', tr: 'FR', bl: 'RL', br: 'R
 const SLOT_POS: Record<Slot, React.CSSProperties> = { tl: { top: 24, left: 24 }, tr: { top: 24, right: 24 }, bl: { bottom: 72, left: 24 }, br: { bottom: 72, right: 24 } };
 const COND_TIP = 'Modelled condition index — not a measured wear value.';
 
-/** 100 = fresh, 0 = modelled end of useful life (cliff + 12 laps). A model output, not measured wear. */
 export function conditionIndex(c: CornerState, k: { TYRES?: typeof TYRES }) {
   const m = (k.TYRES ?? TYRES)[c.compound];
   const end = degradation(m, m.cliffLap + 12);
@@ -50,9 +48,6 @@ export function Stage() {
   const selRef = useRef(sel); selRef.current = sel;
 
   const onFrame = useCallback((pos: Partial<Record<Corner, { x: number; y: number }>>) => {
-    // Bind cards to wheels once (after the model loads, and again on Reset view): the two higher
-    // wheels take the top cards, left to right. Never re-bind while orbiting, so a card always
-    // stays with the same tyre and its line simply follows that wheel round.
     if (!bound.current) {
       const pr = (Object.keys(pos) as Corner[]).map(c => ({ c, ...pos[c]! })).sort((a, b) => a.y - b.y);
       if (pr.length === 4) {
@@ -65,7 +60,6 @@ export function Stage() {
     SLOTS.forEach(slot => {
       const card = cards.current[slot], ln = lines.current[slot], mk = marks.current[slot], target = pos[mapRef.current[slot]];
       if (!card || !ln || !mk || !target) return;
-      // Ease the endpoint toward the projected wheel so the line glides instead of jittering.
       const p = smooth.current[slot] ?? (smooth.current[slot] = { ...target });
       p.x += (target.x - p.x) * 0.35; p.y += (target.y - p.y) * 0.35;
       const left = slot[1] === 'l';

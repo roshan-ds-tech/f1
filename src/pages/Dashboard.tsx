@@ -9,7 +9,6 @@ import { PostRace } from '../components/PostRace';
 import { CircuitProfile } from '../components/dashboard/CircuitProfile';
 import { CIRCUIT_FACTS } from '../config';
 
-/** Recorded lap times for our driver, laps <= current only (replay). */
 export function useObserved() {
   const { mode, fixture, lap, driverCode } = useApp();
   return useMemo(() => {

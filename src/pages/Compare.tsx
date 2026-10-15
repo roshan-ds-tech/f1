@@ -24,12 +24,11 @@ export function Compare() {
   const A = results.find(r => r.strategy.id === selectedId) ?? best;
   const R = A === best ? next : best;
 
-  // Baseline = the ZERO HOUR defaults with the fitted pit loss. Smaller pools: it's only for the verdict line.
   const baseline = useMemo(() => {
     if (mode !== 'scenario') return null;
     const st = deriveRaceState({ mode: 'scenario', circuit, lap: s.currentLap, scenario: DEFAULT_SCENARIO, fixture: null, driverCode: '' });
     return recommend(st, { ...DEFAULTS, ...k, PIT_LOSS_BASE: fittedPit, ...degConstants('nominal'), COARSE_SCENARIOS: 100, FINE_SCENARIOS: 400 }, 42);
-  }, [mode, circuit, s.currentLap, fittedPit, k.TYRES]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [mode, circuit, s.currentLap, fittedPit, k.TYRES]);
 
   const bd = useMemo(() => new Map(results.map(r => [r.strategy.id, breakdown(s, r.strategy, k)])), [results, s, k]);
   const changedItems: string[] = [];
@@ -45,7 +44,6 @@ export function Compare() {
     : b0.strategy.id === best.strategy.id ? `Recommendation unchanged: ${actionTitle(best.strategy, s)}.` : `Recommendation changed: ${actionTitle(b0.strategy, s)} (${plan(b0)}) → ${actionTitle(best.strategy, s)} (${plan(best)}).`;
   const vsub = !changed ? 'Change a condition above and the ranking recalculates.' : `${changedItems.join(' · ')}.${next && baseline?.[1] ? ` Margin ${next.medianDelta.toFixed(1)} s (was ${baseline[1].medianDelta.toFixed(1)} s).` : ''}`;
 
-  // Explanations from the central-scenario breakdown (labelled as such).
   const dif = (X: Breakdown, Y: Breakdown) => COMPONENTS.map(([l, c, n]) => ({ l, n, d: X[c] - Y[c] })).filter(x => Math.abs(x.d) >= .5).sort((p, q) => Math.abs(q.d) - Math.abs(p.d));
   const body = (a: StrategyResult, r: StrategyResult) => {
     const d = dif(bd.get(a.strategy.id)!, bd.get(r.strategy.id)!);

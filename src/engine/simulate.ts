@@ -6,7 +6,6 @@ import { mulberry32 } from './rng';
 
 interface Entry { car:CarState; total:number; stops:number; pitted:boolean; }
 
-/** Returns our finishing position and total time (s) for one strategy under one scenario. */
 export function simulateDetailed(strategy:Strategy, state:RaceState, scenario:Scenario, k:Constants, seed:number):{position:number; time:number} {
   const rng = mulberry32(seed);
   const cars:Entry[] = [state.us, ...state.rivals].map(c => ({ car:{...c}, total:c.startOffsetSec, stops:0, pitted:false }));
@@ -25,7 +24,6 @@ export function simulateDetailed(strategy:Strategy, state:RaceState, scenario:Sc
         if (pit) { c.plannedCompound = strategy.compound; usPitLap = lap; }
       } else if (!e.pitted) {
         pit = c.plannedPitLap !== null && lap === c.plannedPitLap;
-        // cover decision is made once, on the lap after we stop
         if (!pit && usPitLap >= 0 && lap === usPitLap + 1 && rng() < c.coverProbability) pit = true;
       }
       if (pit) {

@@ -6,7 +6,6 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import type { CornerState } from '../../engine/types';
 import type { Theme } from '../../state/theme';
 
-/** Same-origin copy first; GitHub raw (pinned to the commit that added it, so it never moves) as fallback. */
 export const MODEL_URLS = [
   '/models/rb22.glb',
   'https://raw.githubusercontent.com/roshan-ds-tech/f1/bbc28fcfe1fbb1c5c2da524c8b84ffb1f07cd4b1/2026_redbull_rb22.glb',
@@ -46,10 +45,6 @@ function cluster(pts: THREE.Vector3[], la: 'x' | 'z', wa: 'x' | 'z') {
   return cl;
 }
 
-/**
- * RB22 GLB viewer, ported from the design's initViewer/onModel. Wheel screen positions are
- * written into `slots` each frame so the tyre cards can draw leader lines.
- */
 export function Viewer({ theme, autoRotate, selected, apiRef, onStatus, onFrame }: {
   theme: Theme; autoRotate: boolean; selected: Corner | null; attempt: number;
   apiRef: RefObject<ViewerApi | null>;

@@ -47,13 +47,11 @@ export function TyreAnalysis() {
   const lossNow = tyreLoss(cur, age, k), marginal = tyreLoss(cur, age + 1, k) - lossNow;
   const lvl = lossNow < 0.8 ? 'Low' : lossNow < 2 ? 'Moderate' : 'High';
   const lvlCol = lvl === 'Low' ? 'var(--green)' : lvl === 'Moderate' ? 'var(--amber)' : 'var(--red)';
-  // Weather suitability uses the wettest point the scenario reaches.
   const peakWet = s.rainArrivalLap !== null ? Math.max(s.wetnessNow, s.rainIntensity) : s.wetnessNow;
   const pen = (c: Compound) => weatherPenalty(c, peakWet);
   const minPen = Math.min(...ORDER.map(pen));
   const sf = fit(pen(sel) - minPen);
 
-  // Chart: modelled pace loss vs tyre age, 0–40 laps, 0–8 s.
   const X = (a: number) => 48 + a / 40 * 576, Y = (v: number) => 212 - Math.min(v, 8.4) / 8 * 198;
   const curve = (c: Compound, scale = k.DEG_MEAN_SCALE) => Array.from({ length: 41 }, (_, a) => `${a ? 'L' : 'M'}${X(a).toFixed(1)} ${Y(tyreLoss(c, a, k, scale)).toFixed(1)}`).join('');
   let band = curve(sel, k.DEG_MEAN_SCALE * (1 - sigma));
@@ -68,7 +66,7 @@ export function TyreAnalysis() {
       return { c, offset, wear, p, tot, f: fit(p - minPen) };
     });
     return { rows, min: Math.min(...rows.map(r => r.tot)) };
-  }, [stintN, k, T, peakWet]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [stintN, k, T, peakWet]);
 
   const xI = crossoverLap(s, k, 'INTER', ['SOFT', 'MEDIUM', 'HARD']);
   const xW = crossoverLap(s, k, 'WET', ['INTER']);

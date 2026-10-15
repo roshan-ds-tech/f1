@@ -1,5 +1,3 @@
-// Deterministic "central scenario" views of the engine, for explanation only.
-// Rankings, ranges and risk always come from the Monte Carlo results (src/engine/recommend).
 import type { Compound, RaceState, Strategy } from '../engine/types';
 import { TYRES, type Constants } from '../engine/constants';
 import { degradation, weatherPenalty } from '../engine/lapTime';
@@ -15,7 +13,6 @@ export const COMPONENTS = [
 export type Part = typeof COMPONENTS[number][1];
 export type Breakdown = Record<Part, number> & { total: number; stops: number };
 
-/** Wetness on a lap with rain arriving exactly when forecast (3-lap ramp, as in the engine). */
 export function centralWetness(state: RaceState, lap: number) {
   const r = state.rainArrivalLap;
   if (r === null) return state.wetnessNow;
@@ -24,7 +21,6 @@ export function centralWetness(state: RaceState, lap: number) {
 }
 const scLaps = (s: RaceState) => new Set(s.safetyCarActive ? Array.from({ length: s.safetyCarLapsRemaining }, (_, i) => s.currentLap + i) : []);
 
-/** Our remaining time split by cause, with no noise and only the current Safety Car. */
 export function breakdown(state: RaceState, st: Strategy, k: Constants): Breakdown {
   const T = k.TYRES ?? TYRES, sc = scLaps(state);
   const b: Breakdown = { base: 0, tyre: 0, wx: 0, fuel: 0, sc: 0, pit: 0, total: 0, stops: 0 };
@@ -42,10 +38,8 @@ export function breakdown(state: RaceState, st: Strategy, k: Constants): Breakdo
   return b;
 }
 
-/** Modelled lap-time loss vs a fresh set of the same compound. */
 export const tyreLoss = (c: Compound, age: number, k: Constants, scale = k.DEG_MEAN_SCALE) => degradation((k.TYRES ?? TYRES)[c], age) * scale;
 
-/** First lap where a fresh `wetter` tyre is modelled faster than the best fresh `than` tyre. */
 export function crossoverLap(state: RaceState, k: Constants, wetter: Compound, than: Compound[]) {
   const T = k.TYRES ?? TYRES;
   const pace = (c: Compound, lap: number) => T[c].offset + weatherPenalty(c, centralWetness(state, lap));

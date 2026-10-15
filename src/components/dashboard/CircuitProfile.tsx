@@ -9,7 +9,6 @@ const Tag = ({ t }: { t: 'Published' | 'Fitted 2025' | 'Assumption' }) => (
   <span style={{ fontSize: 10.5, fontWeight: 600, color: t === 'Fitted 2025' ? 'var(--green)' : t === 'Assumption' ? 'var(--amber)' : 'var(--text2)' }}>{t}</span>
 );
 
-/** Baku-specific facts, fitted parameters and assumptions, each with where it came from. */
 export function CircuitProfile() {
   const { k } = useApp();
   const f = CIRCUIT_FACTS.baku, cal = CALIBRATION[FOCUS_CIRCUIT], c = CIRCUITS[FOCUS_CIRCUIT];

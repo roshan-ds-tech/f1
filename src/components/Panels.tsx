@@ -10,7 +10,6 @@ export const Badge = ({ c }: { c: Compound }) => (
 export const fmtTime = (s: number) => { const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = Math.round(s % 60); return `${h}:${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`; };
 export const fmtDelta = (d: number) => d < 0.05 ? '—' : `+${d.toFixed(1)} s`;
 
-/** Strategy phrased as an action: PIT NOW / PIT IN 2 LAPS / STAY OUT. */
 export function actionTitle(s: Strategy, state: RaceState) {
   if (s.pitLap === null) return 'Stay out';
   const n = s.pitLap - state.currentLap;
@@ -47,7 +46,6 @@ function Uncertainty({ r }: { r: StrategyResult }) {
   );
 }
 
-/** Dashboard RECOMMENDATION + ALTERNATIVES, one panel as in the design. */
 export function RecommendationPanel() {
   const { results, loading, raceState, k, selectedId, setSelectedId } = useApp();
   const best = results[0], next = results[1];
@@ -101,7 +99,6 @@ export function RecommendationPanel() {
   );
 }
 
-/** Simulator RECOMMENDED panel. */
 export function RecommendedPanel() {
   const { results, loading, raceState, k } = useApp();
   const best = results[0], next = results[1];

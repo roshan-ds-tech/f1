@@ -4,7 +4,6 @@ import { degradation, lapTime } from '../engine/lapTime';
 import { COMPOUND_COLOR } from '../styles/compounds';
 import { COMPOUND_NAME } from './TyreThumb';
 
-// Shared 320x160 plot frame from the design: x 34..312, y 10..140.
 const X0 = 34, X1 = 312, Y0 = 140, Y1 = 10;
 const fmtLap = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
 const tick = { fontSize: 10.5, fill: 'var(--text2)' } as const;
@@ -22,7 +21,6 @@ function Frame({ yLabels, xLabels, children }: { yLabels: string[]; xLabels: { x
   );
 }
 
-/** Deterministic modelled lap times for one strategy (no noise; pit loss and SC laps excluded). */
 export function modelLapSeries(state: RaceState, st: Strategy, k: Constants) {
   const out: { lap: number; t: number }[] = [];
   let comp: Compound = state.us.compound, age = state.us.tyreAge, fuel = state.us.fuelKg;

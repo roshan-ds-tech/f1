@@ -10,7 +10,5 @@ export interface Calibration {
 }
 export interface Outline { circuit: string; source: string; viewBox: string; sectors: [string, string, string]; start: [number, number] }
 
-/** Parameters fitted from recorded races by scripts/calibrate.mjs. */
 export const CALIBRATION: Partial<Record<CircuitId, Calibration>> = { baku: baku as Calibration };
-/** Real outlines built from OpenF1 car positions by scripts/fetchTrackOutline.mjs. */
 export const OUTLINES: Partial<Record<CircuitId, Outline>> = { baku: bakuOutline as unknown as Outline };

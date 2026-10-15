@@ -13,7 +13,6 @@ const PROV_STYLE: Record<Provenance, { color: string; bg: string; dot: string }>
   ESTIMATE: { color: 'var(--blue)', bg: 'var(--blueTint)', dot: 'var(--blue)' },
 };
 
-/** Pill matching the design's "Simulated" badge. `short` renders the one-word form used in the top bar. */
 export function ProvenanceBadge({ tag, short, style }: { tag: Provenance; short?: boolean; style?: CSSProperties }) {
   const s = PROV_STYLE[tag];
   const text = short ? { HISTORICAL: 'Historical', LIVE: 'Live', SIMULATED: 'Simulated', ESTIMATE: 'Model estimate' }[tag] : PROVENANCE_LABEL[tag];
@@ -38,7 +37,6 @@ export function Card({ title, right, children, style, className = '', pad = '26p
   );
 }
 
-/** One cell of a hairline stat strip. Wrap several in <StatStrip>. */
 export function StatTile({ label, value, sub, prov, grow = '1 1 150px', style }:
   { label: string; value: ReactNode; sub?: ReactNode; prov?: Provenance; grow?: string; style?: CSSProperties }) {
   return (

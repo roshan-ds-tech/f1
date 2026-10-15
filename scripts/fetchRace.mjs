@@ -1,4 +1,3 @@
-// Usage: node scripts/fetchRace.mjs [circuit...]   (default: all four)
 import { writeFileSync, mkdirSync } from 'node:fs';
 const BASE = 'https://api.openf1.org/v1';
 const CIRCUITS = {
@@ -78,7 +77,6 @@ async function real(id, c) {
   };
 }
 
-// Deterministic generated fallback (seeded; clearly labelled SIMULATED)
 function mulberry32(a) { return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function simulated(id, c, reason) {
   console.warn(`!!! ${id}: using SIMULATED fallback (${reason})`);

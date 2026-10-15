@@ -25,7 +25,7 @@ export function Shell() {
   const [theme, setTheme] = useTheme();
   const { mode, provenance, scenario } = useApp();
   const { pathname } = useLocation();
-  const toggle = () => setCollapsed(c => { const n = !c; try { localStorage.setItem('pw.collapsed', n ? '1' : '0'); } catch { /* ignore */ } return n; });
+  const toggle = () => setCollapsed(c => { const n = !c; try { localStorage.setItem('pw.collapsed', n ? '1' : '0'); } catch { } return n; });
   const changed = mode !== 'scenario' || (Object.keys(DEFAULT_SCENARIO) as (keyof typeof DEFAULT_SCENARIO)[]).some(k => scenario[k] !== DEFAULT_SCENARIO[k]);
   const dark = theme === 'dark';
   const logo = collapsed ? (dark ? '/brand/mark-dark.png' : '/brand/mark-light.png') : (dark ? '/brand/lockup-dark.png' : '/brand/lockup-light.png');
@@ -53,7 +53,7 @@ export function Shell() {
       <div className="main">
         <header className="topbar">
           <span className="page-title">{TITLES[pathname] ?? 'PITWISE'}</span>
-          <ProvenanceBadge tag={provenance} short />
+          <ProvenanceBadge tag={pathname === '/live' ? 'HISTORICAL' : provenance} short />
           <div style={{ flex: 1 }} />
           {mode === 'replay' && <ReplayTransport />}
           <button className="btn" onClick={() => setDrawer(true)} aria-expanded={drawer} style={{ height: 34, gap: 8 }}>
