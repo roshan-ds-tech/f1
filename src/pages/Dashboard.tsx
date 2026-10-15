@@ -1,84 +1,59 @@
+import { useMemo } from 'react';
 import { useApp } from '../state/AppContext';
-import { Card, StatTile, ProvenanceBadge } from '../components/ui';
-import { Stage } from '../components/Stage';
-import { Recommendation, Alternatives, useSelected, DEG_LABEL } from '../components/Panels';
+import { StatRow } from '../components/dashboard/StatRow';
+import { Stage } from '../components/dashboard/Stage';
+import { RecommendationPanel, useSelected, DEG_LABEL, actionTitle, actionSub } from '../components/Panels';
 import { LapTimeChart, TyreDegChart, WeatherChart } from '../components/charts';
 import { Assumptions } from '../components/Assumptions';
 import { PostRace } from '../components/PostRace';
 
-export function SectorDelta() {
-  const { fixture, mode, lap, driverCode } = useApp();
-  let content = <div className="sub">Sector timing unavailable</div>;
-  if (mode === 'replay' && fixture) {
+/** Recorded lap times for our driver, laps <= current only (replay). */
+export function useObserved() {
+  const { mode, fixture, lap, driverCode } = useApp();
+  return useMemo(() => {
+    if (mode !== 'replay' || !fixture) return undefined;
     const d = fixture.drivers.find(x => x.code === driverCode) ?? fixture.drivers[0];
-    const row = fixture.timeline.filter(e => e.lap <= lap && e.driverNumber === d?.number).at(-1);
-    if (row?.s1 != null && row.s2 != null && row.s3 != null) {
-      const lead = fixture.timeline.filter(e => e.lap === row.lap && e.position === 1)[0];
-      if (lead?.s1 != null && lead.s2 != null && lead.s3 != null) {
-        content = <>{([['S1', row.s1 - lead.s1], ['S2', row.s2 - lead.s2], ['S3', row.s3 - lead.s3]] as const).map(([n, v]) => (
-          <div key={n} className="kv"><span>{n}</span><b className="mono">{v >= 0 ? '+' : ''}{v.toFixed(3)}s</b></div>))}</>;
-      }
-    }
-  }
-  return <Card title="Sector delta vs leader" right={mode === 'replay' ? <ProvenanceBadge tag="HISTORICAL" /> : undefined}>{content}</Card>;
-}
-
-export function StatRow() {
-  const { raceState: s, mode, provenance, circuit, results } = useApp();
-  const ahead = s.rivals.filter(r => r.startOffsetSec < 0).sort((a, b) => a.startOffsetSec - b.startOffsetSec)[0];
-  const gap = ahead ? `+${Math.abs(ahead.startOffsetSec).toFixed(1)}s` : '—';
-  const wx = s.wetnessNow > 0.2 ? 'Wet now' : s.rainArrivalLap ? `Dry · rain ~L${s.rainArrivalLap}` : 'Dry';
-  void mode; void circuit; void results;
-  return (
-    <div className="grid g5">
-      <StatTile label="Lap" value={`${s.currentLap}/${s.totalLaps}`} prov={provenance} />
-      <StatTile label="Position" value={`P${s.position}`} prov={provenance} />
-      <StatTile label="Gap to car ahead" value={gap} sub="Nearest rival ahead (approx. leader gap needs full field)" prov={provenance} />
-      <StatTile label="Weather" value={<span style={{ fontSize: 18 }}>{wx}</span>} sub={s.trackTempC != null ? `Track ${s.trackTempC}°C` : undefined} prov={provenance} />
-      <StatTile label="Track" value={<span style={{ fontSize: 18 }}>{s.safetyCarActive ? 'Safety car' : 'Green flag'}</span>} sub={s.safetyCarActive ? `${s.safetyCarLapsRemaining} laps remaining` : undefined} prov={provenance} />
-    </div>
-  );
-}
-
-export function Charts() {
-  const { raceState, k, scenario } = useApp();
-  const sel = useSelected();
-  return (
-    <div className="grid g3">
-      <Card><LapTimeChart state={raceState} strategy={sel} k={k} /></Card>
-      <Card><TyreDegChart state={raceState} k={k} degLabel={DEG_LABEL[scenario.deg]} /></Card>
-      <Card><WeatherChart state={raceState} /></Card>
-    </div>
-  );
+    return fixture.timeline.filter(e => e.lap <= lap && e.driverNumber === d?.number && !e.pitThisLap && !e.safetyCar).map(e => ({ lap: e.lap, t: e.lapTimeSec }));
+  }, [mode, fixture, lap, driverCode]);
 }
 
 export function Dashboard() {
-  const { raceState: s, results, fixture, mode, provenance } = useApp();
-  const best = results[0];
+  const { raceState: s, results, fixture, mode, k, scenario } = useApp();
+  const best = results[0], next = results[1];
+  const sel = useSelected();
+  const compare = sel && best && sel.id !== best.strategy.id ? best.strategy : next?.strategy;
+  const observed = useObserved();
   const gaps = mode === 'replay' ? fixture?.meta.gaps ?? [] : [];
+  const summary = best
+    ? `${actionTitle(best.strategy, s)}: ${actionSub(best.strategy, s).toLowerCase()}.${next ? ` Under our model it beats the next option by ${next.medianDelta.toFixed(1)} s on average.` : ''}`
+    : 'Calculating strategies…';
+
   return (
-    <div className="page grid" style={{ gap: 16 }}>
-      <div className="row between wrap">
-        <div>
-          <div className="h1">{s.sessionName.toUpperCase()} · LAP {s.currentLap} OF {s.totalLaps}</div>
-          <div className="sub">{best ? `Modelled best call: ${best.strategy.label} (${best.strategy.plan}). Under our model, not a prediction.` : 'Calculating…'}</div>
-        </div>
-        <ProvenanceBadge tag={provenance} />
-      </div>
-      {gaps.length > 0 && <div className="warn">Data gaps: {gaps.join(' · ')}</div>}
+    <div data-screen-label="Race Dashboard page" style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
+      {gaps.length > 0 && <div className="warn">Data gaps in this recorded race: {gaps.join(' · ')}</div>}
       <StatRow />
-      <div className="main-grid">
-        <div className="grid"><Stage /><SectorDelta /></div>
-        <div className="grid" style={{ alignContent: 'start' }}><Recommendation /><Alternatives /></div>
+      <div className="dash-row">
+        <div style={{ flex: '999 1 560px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <Stage />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '6px 4px 0' }}>
+            <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: 2.2, color: 'var(--text2)' }}>{s.sessionName.toUpperCase()} · LAP {s.currentLap} OF {s.totalLaps}</span>
+            <span className="sora" style={{ fontSize: 20, fontWeight: 300, lineHeight: 1.35, letterSpacing: -.3, maxWidth: 900, textWrap: 'balance' }}>{summary}</span>
+          </div>
+        </div>
+        <div style={{ flex: '1 1 330px', maxWidth: 400, minWidth: 0, display: 'flex' }}><RecommendationPanel /></div>
       </div>
-      <Charts />
+      <div className="chart-grid">
+        <LapTimeChart state={s} strategy={sel} compare={compare} k={k} observed={observed} />
+        <TyreDegChart state={s} k={k} degLabel={DEG_LABEL[scenario.deg]} />
+        <WeatherChart state={s} />
+      </div>
+      <footer className="foot">
+        <span><span style={{ width: 7, height: 7, borderRadius: '50%', border: '1.5px solid var(--amberFill)' }} />Simulated: race state, weather, tyre model, strategy outcomes</span>
+        <span><span style={{ width: 7, height: 7, background: 'var(--text2)' }} />Historical: model calibration</span>
+        <span><span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--green)' }} />Live: not connected</span>
+      </footer>
       <Assumptions />
       {mode === 'replay' && <PostRace />}
-      <div className="foot">
-        <div>Simulated: race state, weather, tyre model, strategy outcomes</div>
-        <div>Historical: model calibration</div>
-        <div>Live: not connected</div>
-      </div>
     </div>
   );
 }
