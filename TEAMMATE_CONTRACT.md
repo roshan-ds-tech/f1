@@ -8,6 +8,9 @@ You own **one** page file plus `src/components/<yourpage>/`. Shared files are ow
 | Tyre Analysis | `src/pages/TyreAnalysis.tsx` | `src/components/tyreanalysis/` |
 | Weather & Track | `src/pages/WeatherTrack.tsx` | `src/components/weathertrack/` |
 
+## 0. Circuit
+The project is tailored to **Baku** (`FOCUS_CIRCUIT` in `src/config.ts`; facts in `CIRCUIT_FACTS`). Fitted parameters are in `CALIBRATION.baku` and the real outline is in `OUTLINES.baku` (`src/data/calibration.ts`). Weather & Track and Tyre Analysis should build on these, not on hard-coded numbers.
+
 ## 1. App context
 ```ts
 import { useApp } from '../state/AppContext';

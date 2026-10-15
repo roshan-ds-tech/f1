@@ -1,0 +1,28 @@
+{
+  "circuit": "baku",
+  "source": "Azerbaijan GP 2025 (OpenF1 session 9904)",
+  "provenance": "HISTORICAL-FIT",
+  "fittedAt": "2026-10-15T09:03:52.049Z",
+  "pitLossSec": 20.76,
+  "pitLossSamples": 18,
+  "basePaceSec": 104.24,
+  "cleanLaps": 929,
+  "deg": {
+    "HARD": 0.009,
+    "MEDIUM": 0.005
+  },
+  "stintsUsed": {
+    "HARD": 19,
+    "MEDIUM": 18
+  },
+  "safetyCarLapsRecorded": [
+    1
+  ],
+  "notes": [
+    "Pit loss = in-lap + out-lap minus twice the driver's local median clean lap; Safety Car laps excluded.",
+    "Degradation = median per-stint slope of lap time vs tyre age after removing the fuel-burn gain (1.75 kg/lap × 0.033 s/kg).",
+    "Base pace = 25th percentile of clean laps corrected to zero fuel.",
+    "Soft, Inter and Wet were not run in this race, so those compounds keep the illustrative model values.",
+    "One race is a small sample: treat these as calibrated estimates, not measurements of the circuit."
+  ]
+}

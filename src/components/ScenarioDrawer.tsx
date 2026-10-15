@@ -1,7 +1,8 @@
 import { X } from 'lucide-react';
 import { useEffect } from 'react';
 import { useApp } from '../state/AppContext';
-import { CircuitSelect, SegmentedControl } from './ui';
+import { SegmentedControl } from './ui';
+import { CIRCUIT_FACTS } from '../config';
 
 export function ScenarioControls() {
   const { scenario: sc, setScenario } = useApp();
@@ -23,6 +24,15 @@ export function ScenarioControls() {
   );
 }
 
+function DriverSelect() {
+  const { fixture, driverCode, setDriver } = useApp();
+  if (!fixture) return null;
+  return <div className="ctl"><span className="ctl-l">Driver (our car)</span>
+    <select className="select" value={driverCode} onChange={e => setDriver(e.target.value)}>
+      {fixture.drivers.map(d => <option key={d.code} value={d.code}>{d.code} · {d.name} · {d.team}</option>)}
+    </select></div>;
+}
+
 function DegOnly() {
   const { scenario: sc, setScenario } = useApp();
   return <div className="ctl"><span className="ctl-l">Tyre degradation</span>
@@ -30,7 +40,7 @@ function DegOnly() {
 }
 
 export function ScenarioDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { mode, setMode, circuit, setCircuit, resetScenario } = useApp();
+  const { mode, setMode, resetScenario } = useApp();
   useEffect(() => {
     if (!open) return;
     const k = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -48,14 +58,16 @@ export function ScenarioDrawer({ open, onClose }: { open: boolean; onClose: () =
           </div></div>
         <div className="ctl"><span className="ctl-l">Mode</span>
           <SegmentedControl value={mode} onChange={setMode} options={[{ value: 'scenario', label: 'Scenario' }, { value: 'replay', label: 'Replay' }, { value: 'live', label: 'Live' }]} /></div>
-        <div className="ctl"><span className="ctl-l">Circuit</span><CircuitSelect value={circuit} onChange={setCircuit} />
-          <span style={{ fontSize: 11.5, color: 'var(--text2)' }}>Circuit parameters are explicit assumptions, not measurements.</span></div>
+        <div className="ctl"><span className="ctl-l">Circuit</span>
+          <div style={{ fontWeight: 600 }}>{CIRCUIT_FACTS.baku.name}</div>
+          <span style={{ fontSize: 11.5, color: 'var(--text2)', lineHeight: 1.45 }}>This build is tailored to Baku. Pit loss and base pace are fitted from the 2025 Azerbaijan GP. The scenario keeps the challenge's lap 31 of 53; Baku's real race distance is 51 laps.</span></div>
         <div style={{ height: 1, background: 'var(--line)' }} />
         {mode === 'scenario' ? <ScenarioControls /> : (
           <div style={{ fontSize: 12.5, color: 'var(--text2)', lineHeight: 1.5 }}>
             {mode === 'replay' ? 'Replay reads weather, Safety Car and tyre age from the recorded race, so those inputs are off. Tyre degradation still scales the model.' : 'No live feed is connected. Switch to Scenario or Replay.'}
           </div>
         )}
+        {mode === 'replay' && <DriverSelect />}
         {mode === 'replay' && <DegOnly />}
       </aside>
     </>

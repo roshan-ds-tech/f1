@@ -7,6 +7,8 @@ import { deriveRaceState, degConstants, type Mode } from './deriveRaceState';
 import { FIXTURES } from '../data/fixtures';
 import type { RaceFixture } from '../data/types';
 import { ZERO_HOUR } from './zeroHour';
+import { FOCUS_CIRCUIT } from '../config';
+import { CALIBRATION } from '../data/calibration';
 
 export interface AppContextValue {
   mode: Mode; setMode(m: Mode): void;
@@ -37,7 +39,7 @@ export function useApp(): AppContextValue {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [mode, setModeS] = useState<Mode>('scenario');
-  const [circuit, setCircuitS] = useState<CircuitId>('madrid');
+  const [circuit, setCircuitS] = useState<CircuitId>(FOCUS_CIRCUIT);
   const [driverCode, setDriver] = useState('');
   const [lap, setLapS] = useState(ZERO_HOUR.currentLap);
   const [scenario, setScen] = useState<ScenarioInputs>(DEFAULT_SCENARIO);
@@ -55,7 +57,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [circuit]);
   const setCircuit = useCallback((c: CircuitId) => {
     setCircuitS(c); setDriver(''); setSelectedId(null);
-    setLapS(mode === 'replay' ? Math.max(2, Math.round(FIXTURES[c].meta.totalLaps * 0.4)) : (c === 'madrid' ? ZERO_HOUR.currentLap : Math.round(CIRCUITS[c].totalLaps * 31 / 53)));
+    setLapS(mode === 'replay' ? Math.max(2, Math.round(FIXTURES[c].meta.totalLaps * 0.4)) : ZERO_HOUR.currentLap);
   }, [mode]);
   const setLap = useCallback((l: number) => setLapS(l), []);
 
@@ -70,7 +72,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const k = useMemo<Constants>(() => {
     const tyres = { ...TYRES } as Record<Compound, TyreModel>;
     for (const c of Object.keys(tyreOverrides) as Compound[]) tyres[c] = { ...TYRES[c], ...tyreOverrides[c] };
-    return { ...DEFAULTS, PIT_LOSS_BASE: CIRCUITS[circuit].pitLossBase, ...degConstants(scenario.deg), ...kOverrides, TYRES: tyres };
+    return { ...DEFAULTS, PIT_LOSS_BASE: CALIBRATION[circuit]?.pitLossSec ?? CIRCUITS[circuit].pitLossBase, ...degConstants(scenario.deg), ...kOverrides, TYRES: tyres };
   }, [circuit, scenario.deg, kOverrides, tyreOverrides]);
 
   const { results, loading, elapsedMs } = useRecommendation(raceState, k);

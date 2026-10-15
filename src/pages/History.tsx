@@ -4,15 +4,16 @@ import { CIRCUITS } from '../engine/constants';
 import type { CircuitId, Provenance } from '../engine/types';
 import { Card, ProvenanceBadge } from '../components/ui';
 import { useApp } from '../state/AppContext';
+import { FOCUS_CIRCUIT } from '../config';
 
 export function History() {
   const { setCircuit, setMode } = useApp();
   const nav = useNavigate();
   return (
     <div className="page grid" style={{ gap: 16 }}>
-      <div><div className="h1">RACE HISTORY</div><div className="sub">Prepared race fixtures</div></div>
+      <div><div className="h1">RACE HISTORY</div><div className="sub">Recorded races for the selected circuit</div></div>
       <div className="grid g2">
-        {(Object.keys(FIXTURES) as CircuitId[]).map(id => {
+        {([FOCUS_CIRCUIT] as CircuitId[]).map(id => {
           const m = FIXTURES[id].meta;
           const tag: Provenance = m.provenance === 'HISTORICAL' ? 'HISTORICAL' : 'SIMULATED';
           return (

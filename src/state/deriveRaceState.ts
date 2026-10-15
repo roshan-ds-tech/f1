@@ -3,6 +3,10 @@ import { CIRCUITS, DEFAULTS, TYRES } from '../engine/constants';
 import { degradation } from '../engine/lapTime';
 import type { RaceFixture } from '../data/types';
 import { ZERO_HOUR } from './zeroHour';
+import { CALIBRATION } from '../data/calibration';
+
+/** Base pace for a circuit: fitted from a recorded race when available, else the explicit assumption. */
+export const circuitBasePace = (c:CircuitId) => CALIBRATION[c]?.basePaceSec ?? CIRCUITS[c].basePace;
 
 export type Mode = 'replay' | 'live' | 'scenario';
 export const DEG_PRESETS = { low:{ mean:0.85, mult:0.75 }, nominal:{ mean:1.0, mult:1.0 }, high:{ mean:1.2, mult:1.35 } } as const;
@@ -27,8 +31,11 @@ export function cornersFor(compound:Compound, age:number, stint:number):CornerSt
 
 function scenarioState(circuit:CircuitId, lap:number, sc:ScenarioInputs):RaceState {
   const z = ZERO_HOUR, c = CIRCUITS[circuit];
-  const shift = c.basePace - CIRCUITS.madrid.basePace;
-  const total = circuit === 'madrid' ? z.totalLaps : c.totalLaps;
+  // ZERO_HOUR paces are written relative to a 92.0 s reference lap; re-base them onto this circuit.
+  const shift = circuitBasePace(circuit) - CIRCUITS.madrid.basePace;
+  // The challenge fixes lap 31 of 53. We keep that hypothetical distance (labelled SIMULATED)
+  // rather than presenting it as the circuit's real race length.
+  const total = z.totalLaps;
   const cur = Math.min(lap, total - 2);
   const wet = WX[sc.wx];
   return {
@@ -57,7 +64,7 @@ function replayState(fx:RaceFixture, lap:number, driverCode:string, circuit:Circ
     const comp = (['SOFT','MEDIUM','HARD','INTER','WET'].includes(e.compound) ? e.compound : 'MEDIUM') as Compound;
     const stint = new Set(past.filter(p => p.driverNumber === num && p.pitThisLap).map(p => p.lap)).size;
     return { id:isUs ? 'us' : `d${num}`, name:fx.drivers.find(d => d.number === num)?.code ?? `#${num}`, isUs,
-      basePace:c.basePace, compound:comp, tyreAge:e.tyreAge, fuelKg:Math.max(0, (fx.meta.totalLaps - lap) * DEFAULTS.FUEL_BURN_PER_LAP),
+      basePace:circuitBasePace(circuit), compound:comp, tyreAge:e.tyreAge, fuelKg:Math.max(0, (fx.meta.totalLaps - lap) * DEFAULTS.FUEL_BURN_PER_LAP),
       startOffsetSec:isUs ? 0 : (cum.get(num) ?? 0) - usTime, plannedPitLap:null, plannedCompound:stint > 0 ? 'HARD' : 'MEDIUM',
       coverProbability:0.3, hasPitted:stint > 0 };
   };
