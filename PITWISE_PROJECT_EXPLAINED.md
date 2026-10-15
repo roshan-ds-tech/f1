@@ -6,6 +6,8 @@
 - **Method:** I read every source file under `src/`, `api/`, `server/` and `scripts/`, then ran the tests, type check, linter, production build, and a separate verification script that executed the real engine and API handlers. Nothing in the application was modified.
 - **How to read the status labels:** see [§3](#3-what-actually-works-today). "Verified" always means I ran something and saw the result, not just that code exists.
 
+> **Update after the audit (commit following `ffb3fe1`):** the Telemetry, Weather & Track and Race History pages and their routes were removed, so the app now has Dashboard, Simulator, Live Data, Tyre Analysis, Compare Strategies and Settings. Replay is still started from the Scenario drawer (Mode → Replay); the History page's "Load" button no longer exists. The dashboard sector map is now always coloured: red / amber / blue mark S1 / S2 / S3 when no timing exists, and green / red show real deltas versus the leader in replay. Sections below that describe those three pages refer to the audited commit `cc60b5b`.
+
 > **A note on who wrote this.** The same assistant that wrote most of this code also wrote this audit. To keep that honest, every important claim below is tied to a file and line number. Wherever possible it is also tied to a command whose output is quoted in the [Evidence Appendix](#25-evidence-appendix).
 
 ---

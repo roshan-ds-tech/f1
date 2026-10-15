@@ -15,6 +15,9 @@ export function sectorDeltas(fixture: RaceFixture | null, lap: number, driverCod
   return [row.s1! - lead.s1!, row.s2! - lead.s2!, row.s3! - lead.s3!];
 }
 
+/** Sector identity colours (same as the circuit profile); performance colours are used only with real timing. */
+const SECTOR_COLORS: [string, string, string] = ['var(--red)', 'var(--amberFill)', 'var(--blue)'];
+
 const fmtD = (v: number) => `${v < 0 ? '−' : '+'}${Math.abs(v).toFixed(3)} s`;
 
 export function StatRow() {
@@ -55,14 +58,19 @@ export function StatRow() {
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: scColor, animation: s.safetyCarActive ? 'pw-pulse 1.4s infinite' : 'none' }} />
           {s.safetyCarActive ? 'SAFETY CAR' : 'GREEN FLAG'}</span></div>
       <div className="cell" data-screen-label="Circuit map" style={{ flex: '2 1 300px', padding: '12px 22px', flexDirection: 'row', alignItems: 'center', gap: 20 }}>
-        <CircuitMap circuit={circuit} deltas={deltas} />
+        <CircuitMap circuit={circuit} deltas={deltas} sectorColors={SECTOR_COLORS} />
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <span className="label">Sector delta vs leader</span>
           {deltas ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {deltas.map((d, i) => <span key={i} className="chip">S{i + 1} <b style={{ color: d <= 0 ? 'var(--green)' : 'var(--red)', fontWeight: 600 }}>{fmtD(d)}</b></span>)}
             </div>
-          ) : <div style={{ fontSize: 12, color: 'var(--text2)' }}>Sector timing unavailable</div>}
+          ) : <>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+              {SECTOR_COLORS.map((c, i) => <span key={i} className="chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><span style={{ width: 10, height: 3, borderRadius: 2, background: c }} />S{i + 1}</span>)}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text2)' }}>Sector timing unavailable · colours mark sectors</div>
+          </>}
         </div>
       </div>
     </div>

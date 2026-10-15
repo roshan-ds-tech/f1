@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FlaskConical, RadioTower, Activity, CircleDot, CloudRain, GitCompareArrows, History, Settings as Cog, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, RadioTower, CircleDot, GitCompareArrows, Settings as Cog, PanelLeftClose, PanelLeftOpen, SlidersHorizontal, Sun, Moon } from 'lucide-react';
 import { useState } from 'react';
 import { useApp } from '../state/AppContext';
 import { useTheme } from '../state/theme';
@@ -12,11 +12,8 @@ const ITEMS = [
   { to: '/', label: 'Race Dashboard', Icon: LayoutDashboard },
   { to: '/simulator', label: 'Strategy Simulator', Icon: FlaskConical },
   { to: '/live', label: 'Live Data', Icon: RadioTower },
-  { to: '/telemetry', label: 'Telemetry', Icon: Activity },
   { to: '/tyres', label: 'Tyre Analysis', Icon: CircleDot },
-  { to: '/weather', label: 'Weather & Track', Icon: CloudRain },
   { to: '/compare', label: 'Compare Strategies', Icon: GitCompareArrows },
-  { to: '/history', label: 'Race History', Icon: History },
 ];
 const TITLES: Record<string, string> = Object.fromEntries([...ITEMS.map(i => [i.to, i.label]), ['/settings', 'Settings']]);
 

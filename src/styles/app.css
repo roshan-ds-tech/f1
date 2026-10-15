@@ -109,7 +109,7 @@ table.t td, table.t th { padding: 9px 8px; border-top: 1px solid var(--line); ve
   .tcard { position: static; width: auto; margin: 8px; }
 }
 
-/* legacy helpers still used by Compare / History / Settings and the teammate stubs */
+/* legacy helpers still used by Settings and the Assumptions panel */
 .page .page { padding: 0; max-width: none; margin: 0; }
 .h1 { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 600; letter-spacing: -.3px; }
 .pad { padding: 26px 28px 24px; }
