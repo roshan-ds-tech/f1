@@ -1,32 +1,13 @@
-# React + TypeScript + Vite
+# PITWISE — Race Strategy Intelligence
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Deployed URL: _pending `vercel login`_ · Pages: Race Dashboard `/`, Strategy Simulator `/simulator`, Live Data `/live` (honestly not connected), plus Compare, History, Settings. Telemetry / Tyre Analysis / Weather & Track are teammate stubs (`TEAMMATE_CONTRACT.md`).
 
-Currently, two official plugins are available:
+## API
+`GET /api/health|circuits|race/:c|weather/:c|telemetry/:c?lap=&driver=` · `POST /api/strategy` (same `recommend()` engine as the browser worker).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Lap-time model
+`lap = basePace + offset(compound) + degradation(age)·degScale + fuelKg·SEC_PER_KG + weatherPenalty(compound, wetness) + (SC ? SC_LAP_DELTA : 0) + N(0, PACE_SIGMA)`
+Degradation is linear to `cliffLap`, then steeper. Constants and their sources are in `src/engine/constants.ts` and the Assumptions panel (all assumptions, not measurements).
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Limitations
+No measured tyre wear · fuel estimated · simple rival model · no overtake prediction · no weather forecast · probabilities are model-relative · live mode unconfigured by design · Madrid has no real race data (SIMULATED fixture).
