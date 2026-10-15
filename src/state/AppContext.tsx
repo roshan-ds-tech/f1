@@ -23,7 +23,7 @@ export interface AppContextValue {
   provenance: Provenance;
   // extras (read-only for teammates)
   k: Constants; elapsedMs: number;
-  kOverrides: Partial<Record<string, number>>; setK(key: string, v: number): void;
+  kOverrides: Partial<Record<string, number>>; setK(key: string, v: number): void; clearK(key: string): void;
   tyreOverrides: Partial<Record<Compound, Partial<TyreModel>>>; setTyre(c: Compound, f: keyof TyreModel, v: number): void;
   resetAssumptions(): void;
   selectedId: string | null; setSelectedId(id: string | null): void;
@@ -82,6 +82,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     mode, setMode, circuit, setCircuit, driverCode: code, setDriver, lap, setLap, scenario, setScenario,
     raceState, results, loading, fixture, provenance, k, elapsedMs,
     kOverrides, setK: (key, v) => setKO(p => ({ ...p, [key]: v })),
+    clearK: key => setKO(p => { const n = { ...p }; delete n[key]; return n; }),
     tyreOverrides, setTyre: (c, f, v) => setTO(p => ({ ...p, [c]: { ...p[c], [f]: v } })),
     resetAssumptions: () => { setKO({}); setTO({}); },
     selectedId, setSelectedId, resetScenario,

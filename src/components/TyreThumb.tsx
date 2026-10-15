@@ -1,8 +1,9 @@
 import type { Compound } from '../engine/types';
 import { COMPOUND_COLOR, COMPOUND_LETTER } from '../styles/compounds';
 
-/** Only Soft, Medium and Intermediate photos exist. Hard and Wet use the CSS ring fallback. */
-const IMG: Partial<Record<Compound, string>> = { SOFT: '/tyres/soft.png', MEDIUM: '/tyres/medium.png', INTER: '/tyres/inter.png' };
+/** Photos for all five compounds (from the Tyre Analysis design). The ring fallback stays for safety. */
+export const TYRE_IMG: Partial<Record<Compound, string>> = { SOFT: '/tyres/soft.webp', MEDIUM: '/tyres/medium.webp', HARD: '/tyres/hard.webp', INTER: '/tyres/inter.webp', WET: '/tyres/wet.webp' };
+const IMG = TYRE_IMG;
 export const COMPOUND_NAME: Record<Compound, string> = { SOFT: 'Soft', MEDIUM: 'Medium', HARD: 'Hard', INTER: 'Intermediate', WET: 'Wet' };
 
 export function TyreThumb({ c, w = 46, h = 42, radius = 8 }: { c: Compound; w?: number; h?: number; radius?: number }) {
