@@ -1,0 +1,31 @@
+:root, [data-theme="dark"] {
+  --bg:#07090C; --surface:#0D1015; --surface2:#151A21;
+  --card:rgba(13,16,21,.72);
+  --line:#1B2028; --grid:#1A1F27;
+  --text:#E9EDF2; --text2:#8F99A8;
+  --red:#FF3B30; --med:#F5C02B; --hard:#D1D5DB;
+  --inter:#34D07A; --blue:#60A5FA; --amber:#FBBF24; --green:#34D07A;
+  --shadow:none;
+  --stage:radial-gradient(ellipse 42% 16% at 50% 80%,rgba(255,59,48,.14) 0%,rgba(255,59,48,0) 100%),
+          radial-gradient(ellipse 80% 65% at 50% 62%,#171B22 0%,#0D1015 62%,#090B0E 100%);
+}
+[data-theme="light"] {
+  --bg:#F2F3F5; --surface:#FFFFFF; --surface2:#F5F6F8;
+  --card:rgba(255,255,255,.84);
+  --line:#E4E7EC; --grid:#ECEFF3;
+  --text:#0F1319; --text2:#5B6573;
+  --red:#E10600; --med:#E8A500; --hard:#6B7280;
+  --inter:#16A34A; --blue:#2563EB; --amber:#B45309; --green:#15803D;
+  --shadow:0 1px 2px rgba(15,19,25,.03);
+  --stage:radial-gradient(ellipse 70% 55% at 50% 74%,#FFFFFF 0%,#F2F4F7 55%,#E8EBF0 100%);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:14px; line-height:1.5;
+}
+.card { background:var(--surface); border:1px solid var(--line);
+        border-radius:12px; box-shadow:var(--shadow); }
+.label { font-size:10px; letter-spacing:.09em; text-transform:uppercase; color:var(--text2); font-weight:600; }
+.mono { font-variant-numeric:tabular-nums; }
